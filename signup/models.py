@@ -35,6 +35,14 @@ class Level(TimeStampedModel):
     def __unicode__(self):
         return "Staff Level untuk %s" % self.user.username
 
+class Divisi(models.Model):
+    
+    nama_divisi = models.CharField(max_length=100)
+
+    class Meta:
+        app_label ='signup'
+        verbose_name = 'Divisi'
+        verbose_name_plural = 'Divisi'
 
 class StaffProfile(TimeStampedModel):
     PRIA = 1
@@ -64,12 +72,14 @@ class StaffProfile(TimeStampedModel):
     ACTIVE = 1
     TERMINATE = 2
     RESIGN = 3
-    OTHER_STAFF_STATUS = 4
+    ALUMNI = 4
+    OTHER_STAFF_STATUS = 5
     STAFF_STATUSES = (
         (ACTIVE, 'Active'),
         (TERMINATE, 'Terminate'),
         (RESIGN, 'Resign'),
-        (OTHER_STAFF_STATUS, 'Other Agent Status'),
+        (ALUMNI, 'Alumni'),
+        (OTHER_STAFF_STATUS, 'Other STAFF Status'),
     )
 
 
@@ -82,7 +92,8 @@ class StaffProfile(TimeStampedModel):
     date_of_birth = models.DateField(blank=True,null=True)
     date_start = models.DateTimeField(blank=True,null=True)
     date_end = models.DateTimeField(blank=True,null=True)
-    first_login = models.BooleanField(blank=True)
+    first_login = models.BooleanField(blank=True, null=True)
+    divisi = models.ForeignKey(Divisi, blank=True, null=True, on_delete=models.CASCADE)
 
     class Meta:
         app_label ='signup'
