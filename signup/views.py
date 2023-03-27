@@ -14,7 +14,7 @@ import datetime
 #library internal
 from libint import KonversiChoice
 #models
-from .models import StaffProfile,Level,AdminRole
+from .models import StaffProfile,Level,AdminRole,Divisi
 
 #serializers
 from .serializers import StaffProfileSerializer
@@ -37,6 +37,7 @@ class Signup(APIView):
         fullname = first_name + ' ' + last_name
         date_of_birth = data.get('date_of_birth')
         nim = data.get('nim')
+        divisi = data.get('divisi',None)
 
         konversi = KonversiChoice()
         date_of_birth = datetime.datetime.strptime(date_of_birth, '%Y-%m-%d')
@@ -53,10 +54,18 @@ class Signup(APIView):
         
         try:
             User.objects.create_user(username=username, password=password, email=email)
-            StaffProfile.objects.create(user=User.objects.get(username=username),gender=konversi.gender(gender),
+            
+            if divisi:
+                divisi = Divisi.objects.get(nama_divisi=divisi)
+                StaffProfile.objects.create(user=User.objects.get(username=username),gender=konversi.gender(gender),
                                         religion=konversi.religion(religion),
                                         full_name=fullname,
-                                        date_of_birth=date_of_birth, nim=nim)
+                                        date_of_birth=date_of_birth, nim=nim, divisi=divisi)
+            else:
+                StaffProfile.objects.create(user=User.objects.get(username=username),gender=konversi.gender(gender),
+                                            religion=konversi.religion(religion),
+                                            full_name=fullname,
+                                            date_of_birth=date_of_birth, nim=nim)
             
         except Exception as e:
             return Response({"msg":str(e)},status=status.HTTP_400_BAD_REQUEST)
@@ -85,4 +94,57 @@ class Search(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class AdminSignup(APIView):
+
+    def get(self,request):
+        nama = request.GET.get('nama',None)
+        nim = request.GET.get('nim',None)
+
+        if nama and nim:
+            staff = StaffProfile.objects.filter(nim=nim,full_name__icontains=nama)
+        elif nama:
+            staff = StaffProfile.objects.filter(full_name__icontains=nama)
+        elif nim:
+            staff = StaffProfile.objects.filter(nim=nim)
+        else:
+            staff = StaffProfile.objects.all()
+            
+        serializer = StaffProfileSerializer(staff, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
         
+
+    def post(self, request):
+        admin = request.user.adminrole
+
+        if not admin:
+            return Response({"msg":"Anda Bukan Admin"},status=status.HTTP_404)
+        
+        konver = KonversiChoice()
+        nim = request.data.get('nim')
+        status = request.data.get('status')
+        level = request.data.get('level')
+
+        query = StaffProfile.objects.get(nim=nim)
+
+        try:
+            query.update_status(status=konver.status(status))
+        except Exception as e:
+            return Response({"msg":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(username=query.user.username)
+            Level.objects.create(user=user,level=konver.level(level))
+            query.update_status(user=user,status=konver.status(status))
+        except Exception as e:
+            return Response({"msg":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        return Response({"msg":"Sukses Mengubah Status"},status=status.HTTP_200_OK)
+    
+
+
+
+
+
+
