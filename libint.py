@@ -34,9 +34,9 @@ class KonversiChoice:
     def levels(self,no):
         konvert = {
             "DIREKTUR" : 1,
-            "WAKIL_DIREKTUR" : 2,
-            "KOORDINATOR_ASISTEN" : 3,
-            "KEPALA_DIVISI" : 4,
+            "WADIR" : 2,
+            "KOORDAS" : 3,
+            "KADIV" : 4,
             "STAFF" : 5
         }
 

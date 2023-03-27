@@ -122,20 +122,30 @@ class AdminSignup(APIView):
         
         konver = KonversiChoice()
         nim = request.data.get('nim')
-        status = request.data.get('status')
+    
+        stat = request.data.get('status')
         level = request.data.get('level')
 
         query = StaffProfile.objects.get(nim=nim)
+        
+        
+
 
         try:
-            query.update_status(status=konver.status(status))
+            query.status = konver.status(stat)
+            query.save()
         except Exception as e:
-            return Response({"msg":str(e)},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"msg":str(e)})
         
         try:
-            user = User.objects.get(username=query.user.username)
-            Level.objects.create(user=user,level=konver.level(level))
-            query.update_status(user=user,status=konver.status(status))
+            if (not Level.objects.filter(user=query.user).exists()):
+                Level.objects.create(user=query.user,tipe=konver.levels(level))
+            else:
+                level_staff = Level.objects.filter(user=query.user)
+                
+                level_staff.update(tipe=konver.levels(level))
+
+            
         except Exception as e:
             return Response({"msg":str(e)},status=status.HTTP_400_BAD_REQUEST)
         
