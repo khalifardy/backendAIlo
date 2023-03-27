@@ -22,7 +22,7 @@ from .serializers import StaffProfileSerializer
 
 class Signup(APIView):
     """
-    Kelas untuk signup staff
+    Kelas untuk signup staff, cek
     """
 
     def post(self, request):
