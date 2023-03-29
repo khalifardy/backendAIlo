@@ -1,20 +1,21 @@
-from django.shortcuts import render
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+#from AILO import settings
 #from django.db.models import Q sebuah nama 
 
 #library django-rest-framework
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework import viewsets
-
+from rest_framework.permissions import AllowAny
+from rest_framework_jwt.settings import api_settings
 #library python
-import datetime
+from datetime import datetime
 
 #library internal
-from libint import KonversiChoice
+from libint import KonversiChoice,IsTokenValid
 #models
-from .models import StaffProfile,Level,AdminRole,Divisi
+from .models import StaffProfile,Level,Divisi, AdminRole
 
 #serializers
 from .serializers import StaffProfileSerializer
@@ -24,6 +25,7 @@ class Signup(APIView):
     """
     Kelas untuk signup staff, cek
     """
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         data = request.data
@@ -40,7 +42,7 @@ class Signup(APIView):
         divisi = data.get('divisi',None)
 
         konversi = KonversiChoice()
-        date_of_birth = datetime.datetime.strptime(date_of_birth, '%Y-%m-%d')
+        date_of_birth = datetime.strptime(date_of_birth, '%Y-%m-%d')
 
         if not username or not password or not email or not gender or not religion or not first_name or not last_name or not fullname or not date_of_birth or not nim:
             return Response({"msg":"Please fill all fields"},status=status.HTTP_400_BAD_REQUEST)
@@ -67,6 +69,8 @@ class Signup(APIView):
                                             full_name=fullname,
                                             date_of_birth=date_of_birth, nim=nim)
             
+            AdminRole.objects.create(user=User.objects.get(username=username))
+            
         except Exception as e:
             return Response({"msg":str(e)},status=status.HTTP_400_BAD_REQUEST)
         return Response({"msg":"Sukses membuat"},status=status.HTTP_201_CREATED)
@@ -75,6 +79,7 @@ class Search(APIView):
     """
     Kelas untuk Search Staff
     """
+    permission_classes = (IsTokenValid,)
 
     def post(self, request):
         nama = request.data.get('nama',None)
@@ -96,6 +101,8 @@ class Search(APIView):
 
 class AdminSignup(APIView):
 
+    permission_classes = [IsTokenValid,]
+
     def get(self,request):
         nama = request.GET.get('nama',None)
         nim = request.GET.get('nim',None)
@@ -115,10 +122,10 @@ class AdminSignup(APIView):
         
 
     def post(self, request):
-        admin = request.user.adminrole
+        admin = request.user.adminrole.admin
 
         if not admin:
-            return Response({"msg":"Anda Bukan Admin"},status=status.HTTP_404)
+            return Response({"msg":"Anda Bukan Admin"},status=status.HTTP_400_BAD_REQUEST)
         
         konver = KonversiChoice()
         nim = request.data.get('nim')
@@ -129,8 +136,6 @@ class AdminSignup(APIView):
         query = StaffProfile.objects.get(nim=nim)
         
         
-
-
         try:
             query.status = konver.status(stat)
             query.save()
@@ -153,6 +158,36 @@ class AdminSignup(APIView):
         return Response({"msg":"Sukses Mengubah Status"},status=status.HTTP_200_OK)
     
 
+
+class Login(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+
+        if user is not None:
+            jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+            jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+
+            payload = jwt_payload_handler(user)
+            token = jwt_encode_handler(payload)
+
+            try:
+                role = Level.objects.get(user=user).tipe
+            except :
+                role = "-"
+
+            msg = {'role':role,'token':token}
+
+            return Response(msg,status=status.HTTP_200_OK)
+        else:
+            return Response({"msg":"Username atau Password Salah"},status=status.HTTP_400_BAD_REQUEST)
+
+
+
+            
 
 
 
