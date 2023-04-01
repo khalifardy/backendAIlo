@@ -68,6 +68,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "AILO.urls"
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+
 
 TEMPLATES = [
     {
