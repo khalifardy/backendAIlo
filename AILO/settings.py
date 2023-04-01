@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     "rest_framework_jwt",
     'rest_framework.authtoken',
     "rest_framework_simplejwt",
-    "corsheaders"
+    "corsheaders",
 
 #apps
     "signup"
