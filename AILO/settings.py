@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
-from datetime import timedelta,datetime
+from datetime import timedelta, datetime
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-tpwo_x@v!tgv4!&lz8v2pk(c4t#eh573*+u10$x5#ac5pyvem+
 DEBUG = False
 
 ALLOWED_HOSTS = ["192.168.194.128",
-                 "192.168.18.15" ,
+                 "192.168.18.15",
                  "localhost"]
 
 
@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-#thrid party library
+    # thrid party library
     "rest_framework",
     "django_extensions",
     "rest_framework_jwt",
@@ -50,8 +50,9 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "corsheaders",
 
-#apps
-    "signup"
+    # apps
+    "signup",
+    "blog"
 ]
 
 MIDDLEWARE = [
@@ -105,7 +106,6 @@ DATABASES = {
         "PORT": "3306",
     }
 }
-
 
 
 # Password validation
@@ -203,6 +203,9 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
