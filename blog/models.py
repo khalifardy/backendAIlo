@@ -38,7 +38,8 @@ class Artikel(TimeStampedModel):
 
 
 class Image(TimeStampedModel):
-    artikel = models.ForeignKey(Artikel, on_delete=models.CASCADE)
+    artikel = models.ForeignKey(
+        Artikel, on_delete=models.CASCADE, related_name="images")
     url = models.CharField(max_length=100, blank=True, null=True)
     urutan = models.IntegerField(blank=True, null=True, default=None)
 
