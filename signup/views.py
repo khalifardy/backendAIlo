@@ -30,6 +30,22 @@ class Signup(APIView):
     """
     permission_classes = (AllowAny,)
 
+    def get(self, request):
+        query_divisi = Divisi.objects.all()
+        gender = ["PRIA", "WANITA"]
+        religion = ["ISLAM", "KRISTEN", "KATHOLIK",
+                    "HINDU", "BUDDHA", "OTHER_RELIGION"]
+        divisi = [i.nama_divisi for i in query_divisi]
+
+        respon = {
+            "gender": gender,
+            "religion": religion,
+            "divisi": divisi,
+
+        }
+
+        return Response(respon, status.HTTP_200_OK)
+
     def post(self, request):
         data = request.data
         username = data.get('username')
@@ -222,3 +238,28 @@ class UploadFotoProfile(APIView):
 
         except Exception as e:
             return Response({"msg": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ListSignUpAdmin(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        query_divisi = Divisi.objects.all()
+        gender = ["PRIA", "WANITA"]
+        religion = ["ISLAM", "KRISTEN", "KATHOLIK",
+                    "HINDU", "BUDDHA", "OTHER_RELIGION"]
+        divisi = [i.nama_divisi for i in query_divisi]
+        level = ["DIREKTUR", "WADIR", "KOORDAS", "KADIV", "STAFF"]
+        stat = ["ACTIVE", "TERMINATE", "RESIGN",
+                "ALUMNI", "OTHER_STAFF_STATUS"]
+
+        respon = {
+            "level": level,
+            "gender": gender,
+            "religion": religion,
+            "divisi": divisi,
+            "status": stat
+
+        }
+
+        return Response(respon, status.HTTP_200_OK)
